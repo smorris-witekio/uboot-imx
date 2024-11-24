@@ -110,7 +110,7 @@ int board_mmc_init(struct bd_info *bis)
 		switch (i) {
 		case 0:
 			init_clk_usdhc(2);
-			usdhc_cfg[1].sdhc_clk = mxc_get_clock(MXC_ESDHC3_CLK);
+			usdhc_cfg[0].sdhc_clk = mxc_get_clock(MXC_ESDHC3_CLK);
 			imx_iomux_v3_setup_multiple_pads(
 				usdhc3_pads, ARRAY_SIZE(usdhc3_pads));
 			break;
