@@ -79,7 +79,7 @@ struct efi_fw_image fw_images[] = {
 };
 
 struct efi_capsule_update_info update_info = {
-	.dfu_string = "mmc 2=flash-bin raw 0x42 0x2000 mmcpart 1",
+	.dfu_string = "mmc 0=flash-bin raw 0x42 0x2000 mmcpart 1",
 	.num_images = ARRAY_SIZE(fw_images),
 	.images = fw_images,
 };
