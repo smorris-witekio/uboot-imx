@@ -20,7 +20,6 @@
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/arch/ddr.h>
 #include <asm/sections.h>
-#include <si5351/si5351.h>
 
 #include <power/pmic.h>
 #ifdef CONFIG_POWER_PCA9450
@@ -228,8 +227,7 @@ void board_init_f(ulong dummy)
 	setup_i2c(0, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info1);
 
 	power_init_board();
-
-	SI5351_Init();
+	
 	/* DDR initialization */
 	spl_dram_init();
 

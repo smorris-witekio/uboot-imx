@@ -19,6 +19,7 @@
 #include <i2c.h>
 #include <asm/io.h>
 #include <usb.h>
+#include <si5351/si5351.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -162,7 +163,15 @@ int board_late_init(void)
 		env_set("board_name", "EVK");
 		env_set("board_rev", "iMX8MM");
 	}
-
+	
+	if (true == SI5351_Init())
+	{
+		printf("SI5351 init success\n");
+	}
+	else
+	{
+		printf("SI5351 init failed\n");
+	}
 	return 0;
 }
 
