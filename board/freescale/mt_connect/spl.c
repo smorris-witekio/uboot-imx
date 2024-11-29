@@ -20,6 +20,7 @@
 #include <asm/mach-imx/boot_mode.h>
 #include <asm/arch/ddr.h>
 #include <asm/sections.h>
+#include <si5351/si5351.h>
 
 #include <power/pmic.h>
 #ifdef CONFIG_POWER_PCA9450
@@ -144,42 +145,6 @@ int board_mmc_getcd(struct mmc *mmc)
 
 #if CONFIG_IS_ENABLED(POWER_LEGACY)
 #define I2C_PMIC	0
-#ifdef CONFIG_POWER_PCA9450
-int power_init_board(void)
-{
-	struct pmic *p;
-	int ret;
-
-	ret = power_pca9450_init(I2C_PMIC, 0x25);
-	if (ret)
-		printf("power init failed");
-	p = pmic_get("PCA9450");
-	pmic_probe(p);
-
-	/* BUCKxOUT_DVS0/1 control BUCK123 output */
-	pmic_reg_write(p, PCA9450_BUCK123_DVS, 0x29);
-
-	/* Buck 1 DVS control through PMIC_STBY_REQ */
-	pmic_reg_write(p, PCA9450_BUCK1CTRL, 0x59);
-
-	/* Set DVS1 to 0.8v for suspend */
-	pmic_reg_write(p, PCA9450_BUCK1OUT_DVS1, 0x10);
-
-	/* increase VDD_DRAM to 0.95v for 3Ghz DDR */
-	pmic_reg_write(p, PCA9450_BUCK3OUT_DVS0, 0x1C);
-
-	/* VDD_DRAM needs off in suspend, set B1_ENMODE=10 (ON by PMIC_ON_REQ = H && PMIC_STBY_REQ = L) */
-	pmic_reg_write(p, PCA9450_BUCK3CTRL, 0x4a);
-
-	/* set VDD_SNVS_0V8 from default 0.85V */
-	pmic_reg_write(p, PCA9450_LDO2CTRL, 0xC0);
-
-	/* set WDOG_B_CFG to cold reset */
-	pmic_reg_write(p, PCA9450_RESET_CTRL, 0xA1);
-
-	return 0;
-}
-#else
 int power_init_board(void)
 {
 	struct pmic *p;
@@ -215,7 +180,6 @@ int power_init_board(void)
 
 	return 0;
 }
-#endif
 #endif
 
 void spl_board_init(void)
@@ -265,6 +229,7 @@ void board_init_f(ulong dummy)
 
 	power_init_board();
 
+	SI5351_Init();
 	/* DDR initialization */
 	spl_dram_init();
 

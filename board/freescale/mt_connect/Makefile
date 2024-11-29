@@ -5,7 +5,7 @@
 #
 
 obj-y += imx8mm_evk.o
-
+obj-y += si5351/si5351.o
 ifdef CONFIG_SPL_BUILD
 obj-y += spl.o
 ifdef CONFIG_IMX8M_4G_LPDDR4
