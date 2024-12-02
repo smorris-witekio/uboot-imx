@@ -7,6 +7,7 @@
 #include <env.h>
 #include <init.h>
 #include <miiphy.h>
+#include <micrel.h>
 #include <netdev.h>
 #include <asm/global_data.h>
 #include <asm/mach-imx/iomux-v3.h>
@@ -20,6 +21,7 @@
 #include <asm/io.h>
 #include <usb.h>
 #include <si5351/si5351.h>
+#include <linux/delay.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -36,6 +38,10 @@ static iomux_v3_cfg_t const uart_pads[] = {
 
 static iomux_v3_cfg_t const wdog_pads[] = {
 	IMX8MM_PAD_GPIO1_IO02_WDOG1_WDOG_B  | MUX_PAD_CTRL(WDOG_PAD_CTRL),
+};
+
+static iomux_v3_cfg_t const fec_pads[] = {
+	IMX8MM_PAD_SPDIF_RX_GPIO5_IO4  | MUX_PAD_CTRL(NO_PAD_CTRL),
 };
 
 #ifdef CONFIG_NAND_MXS
@@ -108,11 +114,16 @@ int board_early_init_f(void)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_FEC_MXC)
 static int setup_fec(void)
 {
 	struct iomuxc_gpr_base_regs *gpr =
 		(struct iomuxc_gpr_base_regs *)IOMUXC_GPR_BASE_ADDR;
+
+	imx_iomux_v3_setup_multiple_pads(fec_pads, ARRAY_SIZE(fec_pads));
+	gpio_request(IMX_GPIO_NR(5, 4), "ENET PHY Reset");
+	gpio_direction_output(IMX_GPIO_NR(5, 4) , 0);
+	mdelay(20);
+	gpio_set_value(IMX_GPIO_NR(5, 4), 1);
 
 	/* Use 125M anatop REF_CLK1 for ENET1, not from external */
 	clrsetbits_le32(&gpr->gpr[1], 0x2000, 0);
@@ -122,23 +133,34 @@ static int setup_fec(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
+	int tmp;
+
+	/* read rxc dll control - devaddr = 0x2, register = 0x4c */
+	tmp = ksz9031_phy_extended_read(phydev, 0x02,
+					MII_KSZ9131_EXT_RGMII_2NS_SKEW_RXDLL,
+					MII_KSZ9031_MOD_DATA_NO_POST_INC);
+	/* disable rxdll bypass (enable 2ns skew delay on RXC) */
+	tmp &= ~MII_KSZ9131_RXTXDLL_BYPASS;
+	/* rxc data pad skew 2ns - devaddr = 0x02, register = 0x4c */
+	tmp = ksz9031_phy_extended_write(phydev, 0x02,
+					MII_KSZ9131_EXT_RGMII_2NS_SKEW_RXDLL,
+					MII_KSZ9031_MOD_DATA_NO_POST_INC, tmp);
+	/* read txc dll control - devaddr = 0x02, register = 0x4d */
+	tmp = ksz9031_phy_extended_read(phydev, 0x02,
+					MII_KSZ9131_EXT_RGMII_2NS_SKEW_TXDLL,
+					MII_KSZ9031_MOD_DATA_NO_POST_INC);
+	/* disable txdll bypass (enable 2ns skew delay on TXC) */
+	tmp &= ~MII_KSZ9131_RXTXDLL_BYPASS;
+	/* rxc data pad skew 2ns - devaddr = 0x02, register = 0x4d */
+	tmp = ksz9031_phy_extended_write(phydev, 0x02,
+					MII_KSZ9131_EXT_RGMII_2NS_SKEW_TXDLL,
+					MII_KSZ9031_MOD_DATA_NO_POST_INC, tmp);
+
 	if (phydev->drv->config)
 		phydev->drv->config(phydev);
 
-#ifndef CONFIG_DM_ETH
-	/* enable rgmii rxc skew and phy mode select to RGMII copper */
-	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x1f);
-	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x8);
-
-	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x00);
-	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x82ee);
-	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x05);
-	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x100);
-#endif
-
 	return 0;
 }
-#endif
 
 int board_init(void)
 {

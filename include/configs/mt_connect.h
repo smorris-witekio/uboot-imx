@@ -175,7 +175,7 @@
 #define PHYS_SDRAM                      0x40000000
 #define PHYS_SDRAM_SIZE			0x80000000 /* 2GB DDR */
 
-#define CFG_FEC_MXC_PHYADDR          0
+#define CFG_FEC_MXC_PHYADDR          0x1
 
 #define CFG_MXC_UART_BASE		UART_BASE_ADDR(2)
 
