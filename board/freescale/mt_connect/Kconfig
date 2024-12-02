@@ -7,10 +7,10 @@ config SYS_VENDOR
 	default "freescale"
 
 config SYS_CONFIG_NAME
-	default "imx8mm_evk"
+	default "mt_connect"
 
 config IMX_CONFIG
-	default "board/freescale/mt_connect/imximage-8mm.cfg"
+	default "board/freescale/mt_connect/mt_connect.cfg"
 
 endif
 

@@ -4,7 +4,7 @@
 # SPDX-License-Identifier:      GPL-2.0+
 #
 
-obj-y += imx8mm_evk.o
+obj-y += mt_connect.o
 obj-y += si5351/si5351.o
 obj-y += ddr4_timing.o
 ifdef CONFIG_SPL_BUILD
