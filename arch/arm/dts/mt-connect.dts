@@ -25,29 +25,6 @@
 		reg = <0x0 0x40000000 0 0x80000000>;
 	};
 
-	ak4458_reset: gpio-reset {
-		compatible = "gpio-reset";
-		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
-		#reset-cells = <0>;
-		initially-in-reset;
-	};
-
-	sound-ak4458 {
-		compatible = "fsl,imx-audio-card";
-		model = "ak4458-audio";
-		pri-dai-link {
-			link-name = "akcodec";
-			format = "i2s";
-			fsl,mclk-equal-bclk;
-			cpu {
-				sound-dai = <&sai3>;
-			};
-			codec {
-				sound-dai = <&ak4458>;
-			};
-		};
-	};
-
 	reg_ldo_vcc: regulator-ldo-vcc {
 		compatible = "regulator-fixed";
 		regulator-name = "ldo_vcc_3v3";
@@ -298,16 +275,6 @@
 	scl-gpios = <&gpio5 16 GPIO_ACTIVE_HIGH>;
 	sda-gpios = <&gpio5 17 GPIO_ACTIVE_HIGH>;
 	status = "okay";
-
-	ak4458: ak4458@19 {
-		#sound-dai-cells = <0>;
-		sound-name-prefix = "0";
-		compatible = "asahi-kasei,ak4458";
-		reg = <0x19>;
-		resets = <&ak4458_reset>;
-		AVDD-supply = <&reg_ldo_vcc>;
-		DVDD-supply = <&reg_ldo_vcc>;
-	};
 };
 
 &i2c4 {
