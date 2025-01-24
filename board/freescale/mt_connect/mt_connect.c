@@ -186,6 +186,14 @@ int board_late_init(void)
 		env_set("board_rev", "iMX8MM");
 	}
 	
+	if (true == SI5351_Init())
+	{
+		printf("SI5351 init success\n");
+	}
+	else
+	{
+		printf("SI5351 init failed\n");
+	}
 	return 0;
 }
 
