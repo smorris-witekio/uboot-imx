@@ -39,7 +39,7 @@
 #ifdef CONFIG_DISTRO_DEFAULTS
 #define BOOT_TARGET_DEVICES(func) \
 	func(USB, usb, 0) \
-	func(MMC, mmc, 1)
+	func(MMC, mmc, 0)
 
 #include <config_distro_bootcmd.h>
 #else
